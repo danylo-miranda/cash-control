@@ -1,1 +1,16 @@
 .env
+
+/venv
+
+/src/cash_control/__pycache__
+/src/cash_control/domain/__pycache__
+/src/cash_control/infrasctructure/__pycache__
+/src/cash_control/api/__pycache__
+/src/cash_control/core/__pycache__
+/src/cash_control/domain/entities/__pycache__
+/src/cash_control/domain/interfaces/__pycache__
+/src/cash_control/infrasctructure/models/__pycache__
+/src/cash_control/infrasctructure/repositories/__pycache__
+src/cash_control/api/v1/routes/__pycache__
+src/cash_control/application/dtos/__pycache__
+src/cash_control/application/use_cases/__pycache__
