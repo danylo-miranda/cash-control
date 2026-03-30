@@ -8,6 +8,7 @@ from cash_control.domain.entities.user import User
 from cash_control.infrasctructure.repositories.user_repository_impl import UserRepositoryImpl
 from cash_control.application.use_cases.create_user import CreateUserUseCase
 from cash_control.infrasctructure.models.user_models import UserModel
+from cash_control.core.deps import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -25,6 +26,13 @@ def get_db():
 def get_user_repository(db: Session = Depends(get_db)):
     return UserRepositoryImpl(db)
 
+# PROTEC ROUTES
+@router.get("/secure")
+def protected_route(user=Depends(get_current_user)):
+    return {
+        "message": "Access granted",
+        "user": user
+    }
 
 # CREATE USER
 @router.post(
