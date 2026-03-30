@@ -9,7 +9,7 @@ from cash_control.application.use_cases.create_user import CreateUserUseCase
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-# 🔌 Dependency - DB Session
+# Dependency - DB Session
 def get_db():
     db = SessionLocal()
     try:
@@ -18,12 +18,12 @@ def get_db():
         db.close()
 
 
-# 🔌 Dependency - Repository
+# Dependency - Repository
 def get_user_repository(db: Session = Depends(get_db)):
     return UserRepositoryImpl(db)
 
 
-# 🚀 CREATE USER
+# CREATE USER
 @router.post(
     "/",
     response_model=UserResponseDTO,
@@ -49,7 +49,7 @@ def create_user(
         )
 
 
-# 🔍 GET USER BY EMAIL (exemplo)
+# GET USER BY EMAIL (exemplo)
 @router.get(
     "/by-email/{email}",
     response_model=UserResponseDTO
@@ -73,7 +73,7 @@ def get_user_by_email(
     )
 
 
-# 📄 LIST USERS (mock simples)
+# LIST USERS (mock simples)
 @router.get("/", response_model=list[UserResponseDTO])
 def list_users(
     repo: UserRepositoryImpl = Depends(get_user_repository)
