@@ -8,9 +8,17 @@ class CreateUserUseCase:
         self.repo = repo
     
     def execute(self, dto: CreateUserDTO):
+        existing_user = self.repo.get_by_email(dto.email)        
+        
+        if existing_user:
+            raise ValueError("Email já utilizado, escolha outro.")
+        
+        hashed_password = hash_password(dto.password)
+        
         user = User(
             name=dto.name,
             email=dto.email,
             hashed_password=hash_password(dto.password)
         )
+
         return self.repo.create(user)

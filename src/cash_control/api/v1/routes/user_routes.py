@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from cash_control.core.database import SessionLocal
 from cash_control.application.dtos.user_dto import CreateUserDTO, UserResponseDTO
+from cash_control.domain.entities.user import User
 from cash_control.infrasctructure.repositories.user_repository_impl import UserRepositoryImpl
 from cash_control.application.use_cases.create_user import CreateUserUseCase
+from cash_control.infrasctructure.models.user_models import UserModel
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -38,16 +41,38 @@ def create_user(
     try:
         user = use_case.execute(dto)
         return UserResponseDTO(
-            id=1,  # ⚠️ ajustar quando retornar ID real do banco
+            id=user.id,  
             name=user.name,
             email=user.email
         )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(e)
         )
 
+def create(self, user: User) -> User:
+    try:
+        model = UserModel(
+            name=user.name,
+            email=user.email,
+            password=user.hashed_password
+        )
+
+        self.db.add(model)
+        self.db.commit()
+        self.db.refresh(model)
+
+        return User(
+            id=model.id,
+            name=model.name,
+            email=model.email,
+            hashed_password=model.password
+        )
+
+    except IntegrityError:
+        self.db.rollback()
+        raise ValueError("Email already registered")
 
 # GET USER BY EMAIL (exemplo)
 @router.get(
@@ -67,7 +92,7 @@ def get_user_by_email(
         )
 
     return UserResponseDTO(
-        id=1,
+        id=user.id,
         name=user.name,
         email=user.email
     )
@@ -78,13 +103,13 @@ def get_user_by_email(
 def list_users(
     repo: UserRepositoryImpl = Depends(get_user_repository)
 ):
-    users = getattr(repo, "db", [])  # fallback mock
+    users = repo.list_all()
 
     return [
         UserResponseDTO(
-            id=i + 1,
+            id=user.id,
             name=user.name,
             email=user.email
         )
-        for i, user in enumerate(users)
+        for user in users
     ]

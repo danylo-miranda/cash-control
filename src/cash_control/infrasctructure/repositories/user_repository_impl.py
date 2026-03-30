@@ -19,7 +19,12 @@ class UserRepositoryImpl(UserRepository):
         self.db.commit()
         self.db.refresh(model)
 
-        return user  # pode evoluir depois pra retornar ID
+        return User(
+            id=model.id,
+            name=model.name,
+            email=model.email,
+            hashed_password=model.password
+        )
 
     def get_by_email(self, email: str) -> User | None:
         model = self.db.query(UserModel).filter(UserModel.email == email).first()
@@ -28,7 +33,20 @@ class UserRepositoryImpl(UserRepository):
             return None
 
         return User(
+            id=model.id,
             name=model.name,
             email=model.email,
             hashed_password=model.password
         )
+        
+    def list_all(self) -> list[User]:
+        models =self.db.query(UserModel).all()
+        return [
+            User(
+                id=model.id,
+                name=model.name,
+                email=model.email,
+                hashed_password=model.password
+            )
+            for model in models
+        ]
